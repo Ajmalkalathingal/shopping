@@ -1,11 +1,18 @@
 import { Button } from "./ui/button";
 import { useAppDispatch } from "../app/hooks"; // adjust path
 import { addToCart } from "../features/cart/cartSlice";
+import { toast } from "react-hot-toast";
+
 
 export default function ProductCard({ product }) {
   const dispatch = useAppDispatch();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleAddToCart = () => {
+    if (!user){
+      toast.error("Please login to add items to cart!");
+    return
+    }
     dispatch(addToCart(product));
     console.log(product)
   };

@@ -9,18 +9,29 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/Layout";  
 import HomePage from "./pages/HomePage";
 import CartPage from "./pages/cartPage";
+import { AuthCard } from "./pages/Auth";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-
+// ✅ Router Setup
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,  // ✅ wrap with Layout
+    element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "/cart", element: <CartPage /> },
+      { 
+        path: "cart", 
+        element: (
+          <ProtectedRoute>
+            <CartPage />
+          </ProtectedRoute>
+        ) 
+      },
+      { path: "user-auth", element: <AuthCard /> },
     ],
   },
 ]);
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

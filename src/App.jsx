@@ -1,13 +1,14 @@
-import Navbar from "./components/nav";
-import HomePage from "./pages/HomePage";
+import { lazy, Suspense } from "react";
+
+// Lazy load components
+const Navbar = lazy(() => import("./components/nav"));
+const HomePage = lazy(() => import("./pages/HomePage"));
 
 function App() {
-
   return (
     <>
-      <Navbar />
-
-      <HomePage />
+        <Navbar />
+        <HomePage />
     </>
   );
 }

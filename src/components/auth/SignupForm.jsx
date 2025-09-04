@@ -1,12 +1,13 @@
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-
+import { Spinner } from "@/components/ui/spinner"; // ✅ your spinner
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthProvider";
 
 export default function SignupForm({
   email,
@@ -15,40 +16,52 @@ export default function SignupForm({
   setPassword,
   onSubmit,
 }) {
-  const navigate = useNavigate(); // ✅ init navigate
+  const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { setUser, setIsAdmin } = useContext(AuthContext);
 
-  const handleGoogleLogin = async () => {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-  
-        // Get user info
-        const user = result.user;
-        console.log("User Info:", user);
-  
-        localStorage.setItem("user", JSON.stringify(user));
-  
-        // ✅ Redirect to homepage
-        navigate("/");
-      } catch (error) {
-        console.error("Google Login Error:", error);
-      }
-    };
+  const [loading, setLoading] = useState(false);
+
+  const handleGoogleSignup = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Refresh to ensure we have the latest claims
+      const tokenResult = await user.getIdTokenResult(true);
+      const isAdmin = !!tokenResult.claims.admin;
+
+      setUser(user);
+      setIsAdmin(isAdmin);
+
+      navigate(isAdmin ? "/admin" : "/");
+    } catch (error) {
+      console.error("Google Signup Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onSubmit(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (password !== confirmPassword) {
-              alert("Passwords do not match!");
-              return;
-            }
-            onSubmit(e);
-          }}
-          className="flex flex-col gap-6"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -80,24 +93,31 @@ export default function SignupForm({
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Sign Up
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? <Spinner className="w-5 h-5" /> : "Sign Up"}
           </Button>
         </form>
       </CardContent>
+
       <CardFooter className="flex flex-col gap-2">
         <Button
-          onClick={handleGoogleLogin}
+          onClick={handleGoogleSignup}
           variant="outline"
           className="w-full flex items-center justify-center gap-3 border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-medium shadow-sm transition"
+          disabled={loading}
         >
-          {/* Google Logo */}
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          Continue with Google
+          {loading ? (
+            <Spinner className="w-5 h-5" />
+          ) : (
+            <>
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              Continue with Google
+            </>
+          )}
         </Button>
       </CardFooter>
     </>

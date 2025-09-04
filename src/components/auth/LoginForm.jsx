@@ -1,42 +1,55 @@
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Spinner } from "@/components/ui/spinner"; // ✅ your spinner component
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthProvider";
 
-export default function LoginForm({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  onSubmit,
-}) {
-  const navigate = useNavigate(); // ✅ init navigate
+export default function LoginForm({ email, setEmail, password, setPassword, onSubmit }) {
+  const navigate = useNavigate();
+  const { setUser, setIsAdmin } = useContext(AuthContext);
+
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
+      setLoading(true); // show spinner
       const result = await signInWithPopup(auth, googleProvider);
-
-      // Get user info
       const user = result.user;
-      console.log("User Info:", user);
 
-      localStorage.setItem("user", JSON.stringify(user));
+      // refresh token to get custom claims
+      const tokenResult = await user.getIdTokenResult(true);
+      const isAdmin = !!tokenResult.claims.admin;
 
-      // ✅ Redirect to homepage
-      navigate("/");
+      setUser(user);
+      setIsAdmin(isAdmin);
+
+      navigate(isAdmin ? "/admin" : "/");
     } catch (error) {
       console.error("Google Login Error:", error);
+    } finally {
+      setLoading(false); // hide spinner
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSubmit(e); // your email login logic
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
       <CardContent>
-        <form onSubmit={onSubmit} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -66,8 +79,8 @@ export default function LoginForm({
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? <Spinner className="w-5 h-5" /> : "Login"}
           </Button>
         </form>
       </CardContent>
@@ -77,14 +90,20 @@ export default function LoginForm({
           onClick={handleGoogleLogin}
           variant="outline"
           className="w-full flex items-center justify-center gap-3 border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-medium shadow-sm transition"
+          disabled={loading}
         >
-          {/* Google Logo */}
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          Continue with Google
+          {loading ? (
+            <Spinner className="w-5 h-5" />
+          ) : (
+            <>
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              Continue with Google
+            </>
+          )}
         </Button>
       </CardFooter>
     </>

@@ -1,43 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Card } from "@/components/ui/card";
-import { loginUser, signupUser } from "../services/authService";
 import { toast } from "react-hot-toast";
-import { getErrorMessage } from "../utils/firebaseErrors";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import LoginForm from "../components/auth/LoginForm";
 import SignupForm from "../components/auth/SignupForm";
+import { AuthContext } from "../context/AuthProvider";
+import { loginUser, signupUser } from "../services/authService";
+import { getErrorMessage } from "../utils/firebaseErrors";
 
-export function AuthCard() {
+export default function AuthCard() {
   const [activeTab, setActiveTab] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user, setUser, setIsAdmin } = useContext(AuthContext);
 
-  // ✅ Redirect if user already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      navigate("/"); // redirect to home
+    if (user) {
+      navigate("/"); // redirect to home if logged in
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
-
+  // Set active tab based on query param
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab === "signup" || tab === "login") {
-      setActiveTab(tab);
-    }
+    if (tab === "signup" || tab === "login") setActiveTab(tab);
   }, [searchParams]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const user = await loginUser(email, password);
+      const userCredential = await loginUser(email, password);
       toast.success("Logged in successfully!");
-      localStorage.setItem("user", JSON.stringify(user));
+      setUser(userCredential.user);
+
+      // Check for admin claims
+      const tokenResult = await userCredential.user.getIdTokenResult(true);
+      setIsAdmin(!!tokenResult.claims.admin);
+
       navigate("/");
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -47,9 +51,13 @@ export function AuthCard() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const user = await signupUser(email, password);
+      const userCredential = await signupUser(email, password);
       toast.success("Account created successfully!");
-      localStorage.setItem("user", JSON.stringify(user));
+      setUser(userCredential.user);
+
+      const tokenResult = await userCredential.user.getIdTokenResult(true);
+      setIsAdmin(!!tokenResult.claims.admin);
+
       navigate("/");
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -83,6 +91,7 @@ export function AuthCard() {
           </button>
         </div>
 
+        {/* Forms */}
         {activeTab === "login" ? (
           <LoginForm
             email={email}

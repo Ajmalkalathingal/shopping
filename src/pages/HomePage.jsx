@@ -1,62 +1,75 @@
-import { Menu } from "lucide-react";
-import { useState } from "react";
-import { categories } from "../data/categories";
-import CategoryCard from "../components/CategoryCard";
-import ProductCard from "../components/ProductCard";
-import { products } from "../data/products";
+import { useState, useEffect, lazy, Suspense } from "react";
+import { getCategories } from "../services/categoryService";
+import { getProducts } from "../services/productService";
 
+const CategoryCard = lazy(() => import("../components/CategoryCard"));
+const ProductCard = lazy(() => import("../components/ProductCard"));
 
-const HomePage = ()=>{
+const HomePage = () => {
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
 
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEffect(() => {
+    // Fetch categories first (usually smaller and faster)
+    getCategories()
+      .then(cats => {
+        setCategories(cats);
+        setCategoriesLoading(false);
+      })
+      .catch(console.error);
 
-    return  <>
-        <main className="flex min-h-screen">
-          <section className="w-full mt-px">
-            {/* Toggle Button for Mobile */}
-            <div className="md:hidden flex items-center justify-between mb-4 px-2">
-              <h2 className="text-xl font-bold">Categories</h2>
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-md border"
-              >
-                {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-            </div>
+    // Then fetch products
+    getProducts()
+      .then(prods => {
+        setProducts(prods);
+        setProductsLoading(false);
+      })
+      .catch(console.error);
+  }, []);
 
-            <div className="flex">
-              {/* Sidebar (Categories) */}
-              <aside
-                className={`fixed top-16 left-0 z-40 h-full w-64 bg-white p-4 shadow-md transform transition-transform md:static md:translate-x-0 md:w-1/5 lg:w-1/6 
-                ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-              >
-                <h3 className="text-lg font-semibold mb-3">Categories</h3>
-                <div className="space-y-2">
-                  {categories.map((cat) => (
-                    <CategoryCard key={cat.id} name={cat.name} />
-                  ))}
-                </div>
-              </aside>
+  return (
+    <main className="min-h-screen">
+      {/* Categories load first */}
+      <div className="w-full bg-white shadow-sm sticky top-[80px] z-40">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex justify-start md:justify-center space-x-3 px-3 py-2">
+            {categoriesLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+              ))
+            ) : (
+              categories.map((categorie) => (
+                <Suspense key={categorie.id} fallback={
+                  <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                }>
+                  <CategoryCard name={categorie.name} />
+                </Suspense>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
 
-              {/* Overlay when sidebar open (only mobile) */}
-              {sidebarOpen && (
-                <div
-                  className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
-                  onClick={() => setSidebarOpen(false)}
-                />
-              )}
+      {/* Products load after */}
+      <div className="px-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+        {productsLoading ? (
+          Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="bg-gray-200 rounded-lg h-64 animate-pulse"></div>
+          ))
+        ) : (
+          products.map((product) => (
+            <Suspense key={product.id} fallback={
+              <div className="bg-gray-200 rounded-lg h-64 animate-pulse"></div>
+            }>
+              <ProductCard product={product} />
+            </Suspense>
+          ))
+        )}
+      </div>
+    </main>
+  );
+};
 
-              {/* Products Grid */}
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ml-0 md:ml-4">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-          </section>
-        </main>
-    </>
-}
-
-
-export default HomePage
+export default HomePage;

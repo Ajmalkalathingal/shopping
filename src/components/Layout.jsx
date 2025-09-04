@@ -1,7 +1,8 @@
 // src/components/Layout.jsx
-import React from "react";
+import { lazy } from "react";
 import { Outlet, Link } from "react-router-dom";
-import Navbar from "./nav";
+
+const Navbar = lazy(() => import("./nav"));
 
 const Layout = () => {
   return (

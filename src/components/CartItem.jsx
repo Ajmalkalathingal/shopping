@@ -6,7 +6,7 @@ import { Trash2, Plus, Minus } from "lucide-react";
 import { Link } from "react-router-dom";
 const CartItem = ({ item, formatter }) => {
   const dispatch = useDispatch();
-
+console.log(item)
   return (
     
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
@@ -39,7 +39,7 @@ const CartItem = ({ item, formatter }) => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => dispatch(decreaseQuantity(item.id))}
+            onClick={() => dispatch(decreaseQuantity(item.key))}
           >
             <Minus className="w-4 h-4" />
           </Button>
@@ -47,14 +47,14 @@ const CartItem = ({ item, formatter }) => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => dispatch(increaseQuantity(item.id))}
+            onClick={() => dispatch(increaseQuantity(item.key))}
           >
             <Plus className="w-4 h-4" />
           </Button>
           <Button
             variant="destructive"
             size="icon"
-            onClick={() => dispatch(removeFromCart(item.id))}
+            onClick={() => dispatch(removeFromCart(item.key))}
           >
             <Trash2 className="w-4 h-4" />
           </Button>

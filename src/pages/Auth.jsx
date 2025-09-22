@@ -18,12 +18,15 @@ export default function AuthCard() {
   const [searchParams] = useSearchParams();
   const { user, setUser, setIsAdmin } = useContext(AuthContext);
 
+  // ✅ Get redirect target from query param, fallback to "/"
+  const redirect = searchParams.get("redirect") || "/";
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/"); // redirect to home if logged in
+      navigate(redirect, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, redirect, navigate]);
 
   // Set active tab based on query param
   useEffect(() => {
@@ -42,7 +45,7 @@ export default function AuthCard() {
       const tokenResult = await userCredential.user.getIdTokenResult(true);
       setIsAdmin(!!tokenResult.claims.admin);
 
-      navigate("/");
+      navigate(redirect); 
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
@@ -58,7 +61,7 @@ export default function AuthCard() {
       const tokenResult = await userCredential.user.getIdTokenResult(true);
       setIsAdmin(!!tokenResult.claims.admin);
 
-      navigate("/");
+      navigate(redirect);
     } catch (error) {
       toast.error(getErrorMessage(error));
     }

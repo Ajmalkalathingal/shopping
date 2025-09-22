@@ -1,7 +1,33 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, startAfter, where } from "firebase/firestore";
 import { db } from "../firebase";
 
-export async function getProducts() {
-  const snap = await getDocs(collection(db, "products"));
-  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
+// Fetch products with optional category filter + pagination
+export const getProductsPage = async (pageSize = 10, lastDoc = null, categoryId = null) => {
+  const constraints = [];
+
+  // category filter
+  if (categoryId) {
+    constraints.push(where("categoryId", "==", categoryId));
+  }
+
+  // order + pagination
+  constraints.push(orderBy("createdAt", "desc"));
+  if (lastDoc) {
+    constraints.push(startAfter(lastDoc));
+  }
+  constraints.push(limit(pageSize));
+
+  const q = query(collection(db, "products"), ...constraints);
+
+  const snapshot = await getDocs(q);
+
+  const products = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return {
+    products,
+    lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
+  };
+};

@@ -1,16 +1,18 @@
-import admin from "firebase-admin";
-import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
-// Initialize Firebase Admin
+import 'dotenv/config';
+import admin from "firebase-admin";
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Assign "admin" role to a user
-async function setAdminRole(uid) {
+// Assign admin role using UID from .env
+async function setAdminRole() {
+  const uid = process.env.ADMIN_UID;
   await admin.auth().setCustomUserClaims(uid, { admin: true });
   console.log(`✅ User ${uid} is now an admin`);
 }
 
-// Example usage:
-setAdminRole("cothqkfLKrRZrqTHs3zUShiXNVn2");
+setAdminRole();

@@ -4,11 +4,12 @@ import { clearCart } from "../features/cart/cartSlice";
 import { Button } from "@/components/ui/button";
 import CartItem from "../components/CartItem";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
-  console.log(cartItems)
+  const navigate = useNavigate();
 
   // Currency formatter for INR
   const formatter = new Intl.NumberFormat("en-IN", {
@@ -29,47 +30,7 @@ const CartPage = () => {
       return;
     }
 
-    try {
-      const url = "https://graph.facebook.com/v22.0/834761243044128/messages";
-      const token =
-        "EAAPhrkZBVBFYBPUewaBKETQwehM8Kqj5DT0l2wC4u6uV91gTDxUzf1nRvCAwC9m7oD2GpLyetpOD8MAGuxHpCEOP69FEcHdZA6MfO5wwBK4KC1GRoElO7ycFhPxEobFncuop1yAsqJ9nHYmOrdH3bjzLHZA32PRcMyw95treYhCZBOriK1UDcdaXx7hsdNewxdeu9bf36lhyxvC4FQUYJZAsMLssnnOUgJkMzJw97A08LF5kRlE57oxbSa1VuNQZDZD";
-
-      const recipient = "919061552443"; // Replace with your verified number
-
-      // Build cart message dynamically
-      const message = `🛒 New order from Ajmal\n\n${cartItems
-        .map(
-          (item) =>
-            `• ${item.name} (${item.quantity} × ₹${item.price}) = ₹${
-              item.price * item.quantity
-            }`
-        )
-        .join("\n")}\n\n💵 Total: ₹${totalPrice}\n📍 Address: Kochi, Kerala`;
-
-      const payload = {
-        messaging_product: "whatsapp",
-        to: recipient,
-        type: "template",
-        template: {
-          name: "hello_world", // Must exist in your WhatsApp templates
-          language: { code: "en_US" },
-        },
-      };
-
-      const response = await axios.post(url, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("WhatsApp API response:", response.data);
-      alert("✅ Order sent to WhatsApp!");
-      dispatch(clearCart()); // Clear cart after checkout
-    } catch (err) {
-      console.error("Error sending WhatsApp message:", err.response?.data || err.message);
-      alert("❌ Failed to send WhatsApp message");
-    }
+    navigate("/checkout");
   };
 
   return (
@@ -83,8 +44,8 @@ const CartPage = () => {
       ) : (
         <div className="space-y-4">
           {/* Cart Items */}
-          {cartItems.map((item) => (
-            <CartItem key={item.id} item={item} formatter={formatter} />
+          {cartItems.map((item,index) => (
+            <CartItem  key={index} item={item} formatter={formatter} />
           ))}
 
           {/* Total + Actions */}

@@ -18,6 +18,7 @@ import ProductDetails from "./pages/ProductDetails";
 
 
 import CreateCategory from "./pages/admin/CreateCategory";
+import CheckoutPage from "./pages/CheckoutPage";
 
 const CategoryList = lazy(() => import("./pages/admin/categories"))
 const ProductList = lazy(() => import("./pages/admin/products"))
@@ -33,13 +34,12 @@ const router = createBrowserRouter([
       {
         path: "cart",
         element: (
-          <ProtectedRoute>
             <CartPage />
-          </ProtectedRoute>
         ),
       },
       { path: "user-auth", element: <AuthCard /> },
       { path: "/product/:id", element: <ProductDetails /> },
+       { path: "/checkout", element: <CheckoutPage /> },
 
       // --- Admin Routes ---
       {

@@ -13,34 +13,47 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { userId, product } = action.payload;
-      const existing = state.items.find((i) => i.id === product.id);
+      const { product } = action.payload;
+      console.log(product)
 
+      // ✅ Unique key
+      const key = `${product.id}-${product.size || "nosize"}-${product.color || "nocolor"}-${product.imageUrl || "noimage"}`;
+
+      const existing = state.items.find((i) => i.key === key);
       if (existing) {
         existing.quantity += 1;
-        toast.success(`${product.name} quantity increased!`);
+        toast.success(
+          `${product.name} ${
+            product.size ? `(${product.size})` : ""
+          } ${product.color ? `- ${product.color}` : ""} quantity increased!`
+        );
       } else {
         state.items.push({
+          key,
           id: product.id,
           name: product.name,
           price: product.price,
-          imageUrl: product.imageUrl,
-          size: product.size,
-          userId,
+          imageUrl: product.imageUrl,   
+          size: product.size || null,
+          color: product.color || null,
           quantity: 1,
         });
-        toast.success(`${product.name} added to cart!`);
+        toast.success(
+          `${product.name} ${
+            product.size ? `(${product.size})` : ""
+          } ${product.color ? `- ${product.color}` : ""} added to cart!`
+        );
       }
 
       localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
     removeFromCart: (state, action) => {
-      state.items = state.items.filter((i) => i.id !== action.payload);
+      state.items = state.items.filter((i) => i.key !== action.payload);
       localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
 
     increaseQuantity: (state, action) => {
-      const item = state.items.find((i) => i.id === action.payload);
+      const item = state.items.find((i) => i.key === action.payload);
       if (item) {
         item.quantity += 1;
         toast.success(`${item.name} quantity increased!`);
@@ -49,12 +62,12 @@ const cartSlice = createSlice({
     },
 
     decreaseQuantity: (state, action) => {
-      const item = state.items.find((i) => i.id === action.payload);
+      const item = state.items.find((i) => i.key === action.payload);
       if (item && item.quantity > 1) {
         item.quantity -= 1;
         toast.success(`${item.name} quantity decreased!`);
       } else if (item && item.quantity === 1) {
-        state.items = state.items.filter((i) => i.id !== action.payload);
+        state.items = state.items.filter((i) => i.key !== action.payload);
         toast.success(`${item.name} removed from cart!`);
       }
       localStorage.setItem("cartItems", JSON.stringify(state.items));

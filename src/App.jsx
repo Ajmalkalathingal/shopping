@@ -15,6 +15,7 @@ import CreateCategory from "./pages/admin/CreateCategory";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderCompletePage from "./pages/OrderCompletePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
 
 // Lazy-loaded pages
 const CategoryList = lazy(() => import("./pages/admin/categories"));
@@ -74,6 +75,7 @@ function App() {
         }
       >
         <RouterProvider router={router} />
+        <Toaster position="top-right" reverseOrder={false} />
       </Suspense>
     </AuthProvider>
   );

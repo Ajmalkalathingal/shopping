@@ -82,10 +82,7 @@ export default function UpdateProduct() {
       price: parseFloat(price),
       categoryId: selectedCategory.id,
       categoryName: selectedCategory.name,
-      imageUrl: images
-        .flatMap((i) =>
-          i.split(",").map((x) => x.trim()) 
-        ),
+      imageUrl: images.map((i) => i.trim()).filter((i) => i !== ""),
       sizes: sizes
         .flatMap((s) =>
           s.split(",").map((x) => x.trim()) 
@@ -99,9 +96,8 @@ export default function UpdateProduct() {
 
 
     toast.success("✅ Product updated successfully!");
-    // navigate("/admin/products");
+    navigate("/admin/products");
   };
-console.log(images)
   return (
     <div className="max-w-lg mx-auto p-6 space-y-4">
       <h2 className="text-2xl font-bold">Update Product</h2>

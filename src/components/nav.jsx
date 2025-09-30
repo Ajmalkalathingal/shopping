@@ -38,7 +38,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         {/* Logo */}
-        <div className="text-xl font-bold text-primary">MyBrand</div>
+        <div className="text-l font-bold text-primary">TRENDIFY INTERNATIONAL</div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">

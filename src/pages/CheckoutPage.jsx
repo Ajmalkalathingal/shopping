@@ -19,6 +19,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-hot-toast";
@@ -29,7 +30,7 @@ const CheckoutPage = () => {
   const { state } = useLocation();
   const orderItem = state?.orderItem;
 
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Load checkout items
@@ -38,7 +39,10 @@ const CheckoutPage = () => {
     : JSON.parse(localStorage.getItem("cartItems")) || [];
 
   // Calculate total
-  const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const total = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
 
   //  Load saved addressy
   const savedAddress = JSON.parse(localStorage.getItem("checkoutInfo")) || {};
@@ -57,11 +61,10 @@ const CheckoutPage = () => {
   });
 
   const onSubmit = async (values) => {
-
-      if (!user) {
-    navigate(`/user-auth?redirect=/checkout`);
-    return;
-  }
+    if (!user) {
+      navigate(`/user-auth?redirect=/checkout`);
+      return;
+    }
 
     if (cartItems.length === 0) {
       toast.error("No items to checkout ❌");
@@ -71,7 +74,9 @@ const CheckoutPage = () => {
     let itemsText = "";
     cartItems.forEach((item, index) => {
       const lineTotal = item.price * item.quantity;
-      itemsText += `${index + 1}. ${item.name} - ₹${item.price} (x${item.quantity}) = ₹${lineTotal}\n   Image: ${item.imageUrl}\n`;
+      itemsText += `${index + 1}. ${item.name} - ₹${item.price} (x${
+        item.quantity
+      }) = ₹${lineTotal}\n   Image: ${item.imageUrl}\n`;
     });
 
     const customerInfo = `
@@ -90,7 +95,9 @@ ${itemsText}
 
     const clientNumber = "918714404750";
 
-    const url = `https://wa.me/${clientNumber}?text=${encodeURIComponent(customerInfo)}`;
+    const url = `https://wa.me/${clientNumber}?text=${encodeURIComponent(
+      customerInfo
+    )}`;
 
     if (values.saveInfo) {
       localStorage.setItem("checkoutInfo", JSON.stringify(values));
@@ -107,8 +114,12 @@ ${itemsText}
       <div className="w-full max-w-6xl">
         {/* Title */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-slate-800">Complete Your Order</h1>
-          <p className="text-slate-500 mt-2">Final step to get your products delivered</p>
+          <h1 className="text-3xl font-bold text-slate-800">
+            Complete Your Order
+          </h1>
+          <p className="text-slate-500 mt-2">
+            Final step to get your products delivered
+          </p>
         </div>
 
         {/* 🔥 Two Column Layout */}
@@ -128,7 +139,10 @@ ${itemsText}
               </CardHeader>
               <CardContent className="p-6">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
                     <FormField
                       control={form.control}
                       name="phone"
@@ -136,7 +150,10 @@ ${itemsText}
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your phone number" {...field} />
+                            <Input
+                              placeholder="Enter your phone number"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -238,7 +255,9 @@ ${itemsText}
             <Card className="shadow-md border border-slate-200 rounded-xl sticky top-6">
               <CardHeader className="bg-slate-100">
                 <CardTitle>Order Summary</CardTitle>
-                <CardDescription>Review your items before placing order</CardDescription>
+                <CardDescription>
+                  Review your items before placing order
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {cartItems.length > 0 ? (
@@ -254,7 +273,9 @@ ${itemsText}
                           className="w-16 h-16 object-cover rounded-lg border"
                         />
                         <div className="flex-1">
-                          <h3 className="font-medium text-slate-800">{item.name}</h3>
+                          <h3 className="font-medium text-slate-800">
+                            {item.name}
+                          </h3>
                           <p className="text-sm text-slate-500">
                             {item.color && <>Color: {item.color} • </>}
                             {item.size && <>Size: {item.size}</>}
@@ -274,7 +295,9 @@ ${itemsText}
                     </div>
                   </>
                 ) : (
-                  <p className="text-slate-500 text-center">No items in your order</p>
+                  <p className="text-slate-500 text-center">
+                    No items in your order
+                  </p>
                 )}
               </CardContent>
             </Card>

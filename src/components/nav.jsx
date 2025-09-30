@@ -38,7 +38,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         {/* Logo */}
-        <div className="text-l font-bold text-primary">TRENDIFY INTERNATIONAL</div>
+        <div className="text-l font-bold text-primary">
+          TRENDIFY INTERNATIONAL
+        </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
@@ -49,7 +51,9 @@ export default function Navbar() {
                   asChild
                   className="flex items-center gap-2 px-3 py-2 hover:text-primary transition-colors"
                 >
-                  <Link to="/"><Home size={18} /> Home</Link>
+                  <Link to="/">
+                    <Home size={18} /> Home
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
@@ -58,7 +62,9 @@ export default function Navbar() {
                   asChild
                   className="flex items-center gap-2 px-3 py-2 hover:text-primary transition-colors"
                 >
-                  <Link to="/contact"><Phone size={18} /> Contact</Link>
+                  <Link to="/contact">
+                    <Phone size={18} /> Contact
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
@@ -69,7 +75,9 @@ export default function Navbar() {
                     asChild
                     className="flex items-center gap-2 px-3 py-2 text-red-600 font-medium hover:text-red-700 transition-colors"
                   >
-                    <Link to="/admin"><Shield size={18} /> Admin</Link>
+                    <Link to="/admin">
+                      <Shield size={18} /> Admin
+                    </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               )}
@@ -82,7 +90,9 @@ export default function Navbar() {
           {!user ? (
             <>
               <Link to="/user-auth?tab=login">
-                <Button variant="outline" size="sm">Login</Button>
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
               </Link>
               <Link to="/user-auth?tab=signup">
                 <Button size="sm">Signup</Button>
@@ -107,7 +117,10 @@ export default function Navbar() {
           {/* Cart */}
           <Link to="/cart" className="hover:underline">
             <div className="relative">
-              <ShoppingCart size={22} className="hover:text-primary transition" />
+              <ShoppingCart
+                size={22}
+                className="hover:text-primary transition"
+              />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
@@ -127,27 +140,51 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
+      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden border-t bg-white shadow-inner">
           <div className="flex flex-col p-4 gap-3">
-            <Link to="/" className="flex items-center gap-2 p-2 hover:bg-accent rounded-md">
-              <Home size={18} /> Home
-            </Link>
-            <Link to="/contact" className="flex items-center gap-2 p-2 hover:bg-accent rounded-md">
-              <Phone size={18} /> Contact
-            </Link>
-            {user && isAdmin && (
-              <Link to="/admin" className="flex items-center gap-2 p-2 text-red-600 hover:bg-accent rounded-md">
-                <Shield size={18} /> Admin
+            {[
+              { name: "Home", icon: <Home size={18} />, path: "/" },
+              { name: "Contact", icon: <Phone size={18} />, path: "/contact" },
+              ...(user && isAdmin
+                ? [
+                    {
+                      name: "Admin",
+                      icon: <Shield size={18} />,
+                      path: "/admin",
+                      className: "text-red-600",
+                    },
+                  ]
+                : []),
+            ].map((item, idx) => (
+              <Link
+                key={idx}
+                to={item.path}
+                className={`flex items-center gap-2 p-2 hover:bg-accent rounded-md ${
+                  item.className || ""
+                }`}
+                onClick={() => setMobileOpen(false)} // closes menu automatically
+              >
+                {item.icon} {item.name}
               </Link>
-            )}
+            ))}
 
+            {/* Auth Buttons */}
             {!user ? (
               <div className="flex items-center gap-2 mt-3">
-                <Link to="/user-auth?tab=login">
-                  <Button variant="outline" size="sm">Login</Button>
+                <Link
+                  to="/user-auth?tab=login"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Button variant="outline" size="sm">
+                    Login
+                  </Button>
                 </Link>
-                <Link to="/user-auth?tab=signup">
+                <Link
+                  to="/user-auth?tab=signup"
+                  onClick={() => setMobileOpen(false)}
+                >
                   <Button size="sm">Signup</Button>
                 </Link>
               </div>
@@ -156,7 +193,10 @@ export default function Navbar() {
                 variant="destructive"
                 size="sm"
                 className="mt-3"
-                onClick={handleLogout}
+                onClick={() => {
+                  handleLogout();
+                  setMobileOpen(false);
+                }}
                 disabled={loggingOut}
               >
                 {loggingOut ? "Logging out..." : "Logout"}

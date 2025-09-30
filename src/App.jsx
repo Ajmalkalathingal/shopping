@@ -16,6 +16,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderCompletePage from "./pages/OrderCompletePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
+import ContactPage from "./pages/contact/contact";
 
 // Lazy-loaded pages
 const CategoryList = lazy(() => import("./pages/admin/categories"));
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "cart", element: <CartPage /> },
       { path: "user-auth", element: <AuthCard /> },
+      { path: "contact", element: <ContactPage /> },
       { path: "product/:id", element: <ProductDetails /> },
       { path: "checkout", element: <CheckoutPage /> },
 
